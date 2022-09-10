@@ -1,0 +1,7 @@
+block.block.*.third_party.block_custom_config:
+  type: mapping
+  label: Block attributes third party settings
+  mapping:
+    bgcolor:
+      type: radios
+      label: Select the block background color

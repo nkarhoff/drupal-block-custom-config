@@ -1,0 +1,7 @@
+name: Block Custom Config
+description: A module to add config fields to the Block Configuration form
+package: Custom
+
+type: module
+core: 8.x
+core_version_requirement: ^8 || ^9

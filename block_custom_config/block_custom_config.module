@@ -1,0 +1,74 @@
+<?php
+
+
+use Drupal\block\BlockInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\block\Entity\Block;
+use Drupal\Component\Utility\Html;
+
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function block_custom_config_form_block_form_alter(&$form, FormStateInterface $form_state, $form_id)
+{
+  $block = $form_state->getFormObject()->getEntity();
+
+  // This will automatically be saved in the third party settings.
+  // instead of used this in submit handler $block->setThirdPartySetting('module_name', 'field_name', $value);
+  $form['third_party_settings']['#tree'] = TRUE;
+
+  /**
+   * use this syntax for save values in the third party settings
+   * $form['third_party_settings']['module_name']['field_name']
+   **/
+
+  $form['third_party_settings']['block_custom_config']['bgcolor'] = [
+    '#type' => 'radios',
+    '#title' => t('Background Color'),
+    '#options' => array('white-bg' => 'White Background', 'colored-bg' => 'Colored Background'),
+    '#description' => t('Choose the background color for this block.'),
+    '#default_value' => $block->getThirdPartySetting('block_custom_config', 'bgcolor'),
+  ];
+
+}
+
+
+/**
+ * override hook_ENTITY_TYPE_presave().
+ */
+function block_custom_config_block_presave(BlockInterface $entity) {
+  //  delete classes from  Third Party Settings if bgcolor is empty
+  if (empty($entity->getThirdPartySetting('block_custom_config', 'bgcolor'))) {
+    $entity->unsetThirdPartySetting('block_custom_config', 'bgcolor');
+  }
+
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function block_custom_config_preprocess_block(&$variables)
+{
+
+  // add this condition Blocks coming from page manager widget does not have id.
+  if (!empty($variables['elements']['#id'])) {
+    $block = Block::load($variables['elements']['#id']);
+    if ($block) {
+      // update id of the block
+      if ($bg = $block->getThirdPartySetting('block_custom_config', 'bgcolor')) {
+        $variables['attributes']['class'][] = $bg;
+      }
+
+
+    }
+  }
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function block_custom_config_theme_registry_alter(&$theme_registry)
+{
+  $theme_registry['block']['path'] = drupal_get_path('module', 'block_custom_config') . '/templates';
+}
